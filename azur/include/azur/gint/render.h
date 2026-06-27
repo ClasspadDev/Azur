@@ -268,11 +268,11 @@ extern prof_t azrp_perf_sort;
 /* This counter runs during shader executions in arzp_render_fragments(). */
 extern prof_t azrp_perf_shaders;
 
-/* This counter runs during CPU transfers to the R61524 display. */
-extern prof_t azrp_perf_r61524;
+/* This counter runs during CPU transfers to the R61523/R61524 display. */
+extern prof_t azrp_perf_lcd;
 
-/* This counter runs during rendering; it is the sum of shaders and r61524,
-   plus some logic overhead. */
+/* This counter runs during rendering; it is the sum of shaders and
+   r61524/r61523, plus some logic overhead. */
 extern prof_t azrp_perf_render;
 
 /* azrp_perf_clear(): Clear all performance counters
@@ -398,6 +398,14 @@ void azrp_queue_image(struct gint_image_box *box, image_t const *img,
 void azrp_r61524_fragment_x1(void *fragment, int size);
 
 void azrp_r61524_fragment_x2(void *fragment, int width, int height);
+
+//---
+// Internal R61523 functions
+//---
+
+void azrp_r61523_fragment_x1(void *fragment, int size);
+
+void azrp_r61523_fragment_x2(void *fragment, int width, int height);
 
 //---
 // Internal functions for the image shader
