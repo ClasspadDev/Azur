@@ -57,7 +57,7 @@ bool azur_init_imgui(void);
 
    The main loop stops whenever update() returns non-zero. */
 int azur_main_loop(
-    std::function<void(void)> const &render, int render_fps,
+    std::function<void(int, int)> const &render, int render_fps,
     std::function<int(void)> const &update, int update_ups,
     int flags);
 

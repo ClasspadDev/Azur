@@ -37,23 +37,26 @@ static double ml_time = 0.0;
 static int ml_timer_render = -1;
 static int ml_timer_update = -1;
 
-static int set_flag(volatile int *flag)
+static int set_flag(volatile int *flag, volatile int *drop)
 {
+    if (flag) *drop++;
     *flag = 1;
     return TIMER_CONTINUE;
 }
 
 int azur_main_loop(
-    std::function<void(void)> const &render, int render_fps,
+    std::function<void(int, int)> const &render, int render_fps,
     std::function<int(void)> const &update, int update_ups,
     int flags)
 {
     volatile int render_tick = 1;
     volatile int update_tick = 0;
+    volatile int render_dropped = 0;
+    volatile int update_dropped = 0;
     bool started = false;
 
     ml_timer_render = timer_configure(TIMER_ANY, 1000000 / render_fps,
-        GINT_CALL(set_flag, &render_tick));
+        GINT_CALL(set_flag, &render_tick, &render_dropped));
     if(ml_timer_render < 0) {
         azlog(ERROR, "failed to create render timer\n");
         return 1;
@@ -64,7 +67,7 @@ int azur_main_loop(
 
     if(!(flags & AZUR_MAIN_LOOP_TIED)) {
         ml_timer_update = timer_configure(TIMER_ANY, 1000000 / update_ups,
-            GINT_CALL(set_flag, &update_tick));
+            GINT_CALL(set_flag, &update_tick, &update_dropped));
         if(ml_timer_update < 0) {
             timer_stop(ml_timer_render);
             azlog(ERROR, "failed to create render timer\n");
@@ -77,18 +80,18 @@ int azur_main_loop(
 
     while(1) {
         if(update_tick && !(flags & AZUR_MAIN_LOOP_TIED)) {
-            update_tick = 0;
             if(update && update()) break;
+            update_tick = 0;
         }
 
         if(render_tick) {
-            render_tick = 0;
 
             /* Tied renders and updates */
             if(started && (flags & AZUR_MAIN_LOOP_TIED)) {
                 if(update && update()) break;
             }
-            if(render) render();
+            if(render) render(render_dropped, update_dropped);
+            render_tick = 0;
             started = true;
         }
 

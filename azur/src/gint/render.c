@@ -246,10 +246,11 @@ void azrp_render_fragments(void)
     uint32_t cmd = azrp_cmdq_index.buf[i];
 
     prof_enter_norec(azrp_perf_lcd);
-    // TODO: IF FxGC50 : r61524_start_frame(0, DWIDTH-1, 0, DHEIGHT-1); ELSE :
-    r61523_win_set(0, DWIDTH - 1, 0, DHEIGHT - 1);
-    // TODO: r61523_start_frame instead !
-    dupdate();
+#if GINT_HW_CP
+    r61523_start_frame(0, DWIDTH - 1, 0, DHEIGHT - 1);
+#else
+    r61524_start_frame(0, DWIDTH - 1, 0, DHEIGHT - 1);
+#endif
     prof_leave_norec(azrp_perf_lcd);
 
     while(1) {
@@ -271,11 +272,18 @@ void azrp_render_fragments(void)
         }
 
         prof_enter_norec(azrp_perf_lcd);
+#if GINT_HW_CP
         if(azrp_scale == 1)
             azrp_r61523_fragment_x1(azrp_frag, DWIDTH * azrp_frag_height);
         else if(azrp_scale == 2)
             azrp_r61523_fragment_x2(azrp_frag, azrp_width, azrp_frag_height);
-        // TODO: r61523 x3 output function
+#else
+        if(azrp_scale == 1)
+            azrp_r61524_fragment_x1(azrp_frag, DWIDTH * azrp_frag_height);
+        else if(azrp_scale == 2)
+            azrp_r61524_fragment_x2(azrp_frag, azrp_width, azrp_frag_height);
+#endif
+        // TODO: x3 output function
         prof_leave_norec(azrp_perf_lcd);
 
         if(++frag >= azrp_frag_count) break;
@@ -311,12 +319,7 @@ static void reconfigure_all_shaders(void)
 
 static void update_frag_count(void)
 {
-    if(azrp_scale == 1)
-        azrp_frag_count = 14 + (azrp_frag_offset > 0);
-    else if(azrp_scale == 2)
-        azrp_frag_count = 7 + (azrp_frag_offset > 0);
-    else if(azrp_scale == 3)
-        azrp_frag_count = 5 + (azrp_frag_offset > 5);
+    azrp_frag_count = (azrp_height + azrp_frag_offset + azrp_frag_height - 1) / azrp_frag_height;
 }
 
 static void update_size(void)

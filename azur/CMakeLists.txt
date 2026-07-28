@@ -137,7 +137,7 @@ if(NOT AZUR_PLATFORM STREQUAL gint)
   target_link_libraries(azur PUBLIC Azur::ImGui Azur::STB)
 endif()
 
-target_include_directories(azur PRIVATE
+target_include_directories(azur PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
   "${CMAKE_CURRENT_BINARY_DIR}/include")
 
