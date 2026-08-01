@@ -22,9 +22,9 @@ struct command {
     /* Local y coordinate of the first line in the fragment */
     uint8_t y;
     /* Number of lines to render total, including this fragment */
-    uint8_t height_total;
+    uint16_t height_total;
     /* Number of lines to render on the current fragment */
-    uint8_t height_frag;
+    uint32_t height_frag; // oversized for padding
     /* Rectangle along the x coordinates (in longwords) */
     uint16_t xl, wl;
     /* Offset of left edge */

@@ -33,17 +33,17 @@ _azrp_shader_rect:
 	mov.l	r8, @-r15
 	nop
 
-	mov.b	@_cmd+, r8		/* height_total */
+	mov.w	@_cmd+, r8		/* height_total */
 	extu.b	r3, r3
 
-	mov.b	@_cmd+, _height		/* height_frag */
+	mov.l	@_cmd+, _height		/* height_frag */
 	mulu.w	r3, _stride
 
 	mov.w	@_cmd+, r2		/* xl */
-	mov	#-4, r0
+	mov	#-8, r0
 
 	sub	_height, r8
-	mov.b	r8, @(r0, _cmd)		/* update: height_total */
+	mov.w	r8, @(r0, _cmd)		/* update: height_total */
 
 	mov.l	.azrp_frag_height, r0	/* ... inefficient ... */
 	shll2	r2
@@ -65,10 +65,10 @@ _azrp_shader_rect:
 	bf	1f
 	mov	r0, r8
 
-1:	mov	#-5, r0
-	mov.b	r8, @(r0, _cmd)		/* update: height_frag */
+1:	mov	#-8, r0
+	mov.l	r8, @(r0, _cmd)		/* update: height_frag */
 
-	mov	#-7, r0
+	mov	#-11, r0
 	mov.b	r2, @(r0, _cmd)		/* update: y */
 
 	mov.w	@_cmd+, _edge_1		/* edge_1 */
@@ -128,12 +128,13 @@ _azrp_shader_rect:
 _azrp_shader_rect_loop_flat:
 	extu.w	r5, r0
 	shll16	r5
-	or	r0, r5
-	lds	r5, x0
+	or	r5, r0
+	//lds	r5, x0
 
 	START
 	mov	_frag, r5
-2:3:	movs.l	x0, @r5+
+2:	mov.l	r0, @r5
+3:  add #4, r5
 	mov	r5, _frag
 	END
 
